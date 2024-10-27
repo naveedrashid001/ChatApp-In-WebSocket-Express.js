@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO Chat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Chat styling */
+    .chat-window {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      height: 80vh; /* Height of the chat window */
+      width: 100%; /* Width of the chat window */
+      overflow-y: auto; /* Allow scrolling */
+      
+      /* Background image properties */
+      background-image: url("https://is.zobj.net/image-server/v1/images?r=DBZ_detbClA07Z8Dbb5a5Dn-kprwa3QsD6L3yV647tKbM3FMKXwA_dk-FhrwHGnhyAU5iKZ2PLIEHPo010UFSGhilP10BKL5p2StZr3UJ5sybIENj5rcPmIn3ish9xxmbMKZ7NDwSfK0wQkgxbJ4vo1vtU3Rz14ac4HSAuXYnbEApbPaaVcjz-ZuDoRtYPd0ZH6NcJNVPq37vyin3hpPEfh22hdEx4AMa9oFaA");
+      background-size: cover; /* Cover the entire chat window */
+      background-position: center; /* Center the background image */
+      background-repeat: no-repeat; /* Prevent the background from repeating */
+    }
+
+    .message {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 15px;
+      max-width: 75%; /* Maximum width of message */
+      word-wrap: break-word; /* Allow long words to wrap */
+    }
+
+    .sent {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+      text-align: right;
+      margin-left: auto; /* Aligns the sent message to the right */
+    }
+
+    .received {
+      background-color: #fff;
+      align-self: flex-start;
+      text-align: left;
+      margin-right: auto; /* Aligns the received message to the left */
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <!-- User 1 Chat Window -->
+      <div class="col-sm-4">
+        <h4 class="text-center my-3">User 1</h4>
+        <div id="messages1" class="chat-window d-flex flex-column">
+            <!-- Messages will be displayed here -->
+        </div>
+        
+        <!-- Chat input form at the bottom -->
+        <form id="form1" class="d-flex mt-2">
+            <input id="input1" type="text" class="form-control" placeholder="Type a message..." autocomplete="off">
+            <button class="btn btn-primary ms-2">Send</button>
+        </form>
+      </div>
+      
+      <!-- User 2 Chat Window -->
+      <div class="col-sm-4 offset-sm-2">
+        <h4 class="text-center my-3">User 2</h4>
+        <div id="messages2" class="chat-window d-flex flex-column"></div>
+        <form id="form2" class="d-flex mt-2">
+          <input id="input2" type="text" class="form-control" placeholder="Type a message..." autocomplete="off">
+          <button class="btn btn-primary ms-2">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Elements for User 1
+    const form1 = document.getElementById('form1');
+    const input1 = document.getElementById('input1');
+    const messages1 = document.getElementById('messages1');
+
+    // Elements for User 2
+    const form2 = document.getElementById('form2');
+    const input2 = document.getElementById('input2');
+    const messages2 = document.getElementById('messages2');
+
+    // Send message from User 1
+    form1.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input1.value) {
+        const message = input1.value;
+        socket.emit('chat message', { user: 1, message: message });
+        displayMessage(messages1, message, 'sent'); // Display in User 1's messages
+        displayMessage(messages2, message, 'received'); // Display in User 2's messages
+        input1.value = '';
+      }
+    });
+
+    // Send message from User 2
+    form2.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input2.value) {
+        const message = input2.value;
+        socket.emit('chat message', { user: 2, message: message });
+        displayMessage(messages2, message, 'sent'); // Display in User 2's messages
+        displayMessage(messages1, message, 'received'); // Display in User 1's messages
+        input2.value = '';
+      }
+    });
+
+    // Function to display messages in the chat window
+    function displayMessage(container, text, type) {
+      const item = document.createElement('div');
+      item.className = `message ${type}`;
+      item.textContent = text;
+      container.appendChild(item);
+      container.scrollTop = container.scrollHeight; // Auto scroll to the bottom
+    }
+  </script>
+</body>
+</html>
