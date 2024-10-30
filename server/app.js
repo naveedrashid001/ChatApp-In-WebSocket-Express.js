@@ -3,13 +3,23 @@ const { createServer } = require('node:http');
 const { join } = require('node:path');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
-const messageRoutes = require('./routes/messageroutes'); // Import routes
-const { User1Messages, User2Messages } = require('./models/messages'); // Adjust this path if needed
+const cors = require('cors'); // Import the cors package
 
+// const messageRoutes = require('./routes/messageroutes'); // Import message routes
+const userroutes = require('./routes/userroutes'); // Import auth routes
+const { User1Messages, User2Messages } = require('./models/messages'); // Adjust this path if needed
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+
+// Enable CORS for all routes and origins
+app.use(cors()); // This enables CORS for all origins
+// Alternatively, customize CORS settings like this:
+// app.use(cors({ origin: 'http://localhost:5173' }));
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/chatapp')
@@ -20,6 +30,9 @@ mongoose.connect('mongodb://localhost:27017/chatapp')
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, '/public/index.html'));
 });
+
+// User registration route (using the imported auth routes)
+app.use('/userroutes', userroutes); // Mount the auth routes on /userroutes path
 
 // Socket.IO connection
 io.on('connection', (socket) => {
@@ -46,7 +59,7 @@ io.on('connection', (socket) => {
 });
 
 // Use the message routes
-app.use('/messages', messageRoutes); // Mount the message routes on /messages path
+// app.use('/messages', messageRoutes); // Mount the message routes on /messages path
 
 // Start the server
 server.listen(3000, () => {

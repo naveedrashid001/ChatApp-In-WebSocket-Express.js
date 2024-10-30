@@ -1,0 +1,20 @@
+.full-screen-image {
+    position: fixed; /* Fix position to cover the entire viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Full viewport width */
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent scrollbars */
+    z-index: 999; /* Ensure it's on top of other content */
+    display: flex; /* Use flexbox to center the image */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: black; /* Optional: Set a background color */
+  }
+  
+  .full-screen-image img {
+    max-width: 100%; /* Ensure the image does not exceed viewport width */
+    max-height: 100%; /* Ensure the image does not exceed viewport height */
+    object-fit: cover; /* Scale the image to cover the container */
+  }
+  
