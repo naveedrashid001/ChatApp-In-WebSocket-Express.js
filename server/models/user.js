@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require('mongoose');
 
 // Define the user schema
@@ -6,7 +5,7 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     required: true,
-    unique: true, // Ensure phone numbers are unique
+    unique: true,
   },
   name: {
     type: String,
@@ -14,7 +13,19 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true, // Add the password field here
+    required: true,
+  },
+  friends: [
+    {
+      name: String,
+      phoneNumber: String,
+      avatar: { type: String, default: 'https://static.vecteezy.com/system/resources/previews/027/448/973/non_2x/avatar-account-icon-default-social-media-profile-photo-vector.jpg' }, // Optional avatar for friends
+    },
+  ],
+  avatar: {
+    type: String,
+    required: true,
+    default: 'https://static.vecteezy.com/system/resources/previews/027/448/973/non_2x/avatar-account-icon-default-social-media-profile-photo-vector.jpg', // Default avatar for user
   },
   createdAt: {
     type: Date,

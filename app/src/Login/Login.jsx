@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie'; // Import js-cookie
 
 function Login({ onLogin }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -11,18 +12,24 @@ function Login({ onLogin }) {
     e.preventDefault();
 
     try {
-        const response = await fetch('http://localhost:3000/userroutes/login', { 
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ phoneNumber, password }),
-          });
-          
+      const response = await fetch('http://localhost:3000/userroutes/login', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, password }),
+      });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Assuming the token is returned in data.token
+        const { token } = data; // Adjust based on your API response
+
+        // Store the token and phone number in cookies
+        Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
+        Cookies.set('phoneNumber', phoneNumber, { expires: 7 });
+
         onLogin(); // Update authentication status
         navigate('/mainpage'); // Redirect to home page
       } else {
