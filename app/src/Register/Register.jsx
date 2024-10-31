@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createAvatar } from '@dicebear/avatars';
-import * as style from '@dicebear/avatars-bottts-sprites';
+import Cookies from 'js-cookie';
 
 function Register() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -13,28 +12,19 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Generate a random avatar SVG
-    const avatarSvg = createAvatar(style, { seed: phoneNumber || Math.random().toString() });
-
     try {
       const response = await fetch('http://localhost:3000/userroutes/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber, name, password, avatar: avatarSvg }), // Send avatar SVG as string
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber, name, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage('Registration successful!');
-        setPhoneNumber('');
-        setName('');
-        setPassword('');
-
-        // Redirect to the login page
-        navigate('/login');
+        Cookies.set('phoneNumber', phoneNumber, { expires: 7 }); // Save phone number in cookies
+        navigate('/AddProfile'); // Redirect to AddProfile page
       } else {
         setMessage(data.message || 'Registration failed.');
       }
@@ -78,7 +68,6 @@ function Register() {
         <button type="submit">Register</button>
       </form>
       {message && <p>{message}</p>}
-      <button onClick={() => navigate('/login')}>Already have an account? Log in</button>
     </div>
   );
 }

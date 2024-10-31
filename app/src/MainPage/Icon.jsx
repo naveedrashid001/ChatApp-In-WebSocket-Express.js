@@ -1,5 +1,6 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom';
 
 function Icon() {
   return (
@@ -17,7 +18,9 @@ function Icon() {
         
         <i className="bi bi-archive"></i>
         <i className="bi bi-gear"></i>
+        <Link to="/profile">
         <i className="bi bi-person-circle"></i>
+        </Link>
       </div>
     </div>
   );

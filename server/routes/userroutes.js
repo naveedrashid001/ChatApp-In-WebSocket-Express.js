@@ -4,42 +4,39 @@ const User = require('../models/user'); // Import the User model
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken'); // Import jwt for token generation
-const { createAvatar } = require('@dicebear/avatars');
+// const { createAvatar } = require('@dicebear/avatars');
 const style = require('@dicebear/avatars-bottts-sprites');
 
 // User registration route
 router.post('/register', async (req, res) => {
     const { phoneNumber, name, password } = req.body;
-  
+
     try {
-      // Check if the user already exists
-      const existingUser = await User.findOne({ phoneNumber });
-      if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
-  
-      // Hash the password before saving
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Generate a random avatar SVG
-      const avatarSvg = createAvatar(style, { seed: phoneNumber || Math.random().toString() });
-  
-      // Create a new user instance
-      const newUser = new User({
-        phoneNumber,
-        name,
-        password: hashedPassword, // Save the hashed password
-        avatar: avatarSvg,        // Save the avatar SVG
-      });
-  
-      // Save the user to the database
-      await newUser.save();
-      res.status(201).json({ message: 'User registered successfully', user: newUser });
+        // Check if the user already exists
+        const existingUser = await User.findOne({ phoneNumber });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Hash the password before saving
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create a new user instance without manually setting an avatar (model's default will be used)
+        const newUser = new User({
+            phoneNumber,
+            name,
+            password: hashedPassword // Save the hashed password
+        });
+
+        // Save the user to the database
+        await newUser.save();
+        res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
-      console.error('Error registering user:', error);
-      res.status(500).json({ message: 'Error registering user', error });
+        console.error('Error registering user:', error);
+        res.status(500).json({ message: 'Error registering user', error });
     }
-  });
+});
+
 
 // User login route
 router.post('/login', async (req, res) => {
@@ -137,6 +134,106 @@ router.get('/friends/:phoneNumber', async (req, res) => {
     }
 });
 
+// // Check if the user exists based on the phone number
+router.get('/checkUser', async (req, res) => {
+  const { phoneNumber } = req.query;
+
+  try {
+    const user = await User.findOne({ phoneNumber });
+
+    if (user) {
+      res.status(200).json({ message: 'User exists' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    res.status(500).json({ message: 'Server error while checking user' });
+  }
+});
+
+
+// Route to add an image URL to the user profile
+router.post('/addImage', async (req, res) => {
+    const { phoneNumber, imageUrl } = req.body;
+  
+    try {
+      // Find the user by phone number
+      const user = await User.findOne({ phoneNumber });
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Update the user's image URL if provided, else keep the default
+      if (imageUrl) {
+        user.avatar = imageUrl;
+      }
+      await user.save();
+  
+      res.status(200).json({ message: 'Image saved successfully' });
+    } catch (error) {
+      console.error('Error saving image:', error);
+      res.status(500).json({ message: 'Server error while saving image' });
+    }
+  });
+
+  // profile page 
+router.get('/user/avatar', async (req, res) => {
+    const phoneNumber = req.query.phoneNumber;
+
+    try {
+        const user = await User.findOne({ phoneNumber });
+        
+        if (user) {
+            res.status(200).json({ avatar: user.avatar });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching user avatar:', error);
+        res.status(500).json({ message: 'Error fetching user avatar' });
+    }
+});
+
+// Route to get user for profile page 
+router.get('/user', async (req, res) => {
+    const { phoneNumber } = req.query;
+  
+    try {
+      const user = await User.findOne({ phoneNumber });
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ message: 'Error fetching user' });
+    }
+  });
+  
+// Add this to your Express backend (e.g., in userroutes.js)
+router.post('/user/update', async (req, res) => {
+    const { phoneNumber, avatar, name, about } = req.body;
+  
+    try {
+      const user = await User.findOneAndUpdate(
+        { phoneNumber },
+        { avatar, name, about },
+        { new: true } // Return the updated document
+      );
+  
+      if (user) {
+        res.status(200).json({ message: 'User profile updated successfully', user });
+      } else {
+        res.status(404).json({ message: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ message: 'Error updating user profile' });
+    }
+  });
   
   
   // Route to get all users

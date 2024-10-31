@@ -5,6 +5,8 @@ import Login from './Login/Login';
 import MainPage from './MainPage/MainPage';
 import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Profile from './MainPage/Profile/Profile';
+import AddProfile from './Register/AddProfle';
 
 
 function App() {
@@ -52,6 +54,10 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/profile" element={<Profile/>} />
+          <Route path="/AddProfile" element={<AddProfile/>} />
+
+
           {/* Protecting the MainPage route */}
           <Route
             path="/mainpage"

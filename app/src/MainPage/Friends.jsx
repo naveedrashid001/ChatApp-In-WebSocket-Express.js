@@ -7,8 +7,8 @@ function Friends({ friends, searchTerm }) {
         friends.map((friend, index) => (
           <div 
             key={index} 
-            className="friend-item d-flex align-items-center mb-3"
-            style={{ padding: '10px', borderRadius: '8px', background: '#f8f9fa' }}
+            className="friend-item d-flex align-items-center mb-1"
+            style={{ padding: '5px', borderRadius: '8px', background: '#f8f9fa' }}
           >
             {/* Avatar Image */}
             <img
@@ -26,7 +26,7 @@ function Friends({ friends, searchTerm }) {
 
             {/* Friend Info */}
             <div>
-              <h6 className="mb-1" style={{ fontSize: '1.1em', fontWeight: '500' }}>{friend.name}</h6>
+              <p className="mb-0" style={{ fontSize: '1.1em', fontWeight: '500' }}>{friend.name}</p>
               <p className="mb-0 text-small" style={{ color: '#6c757d' }}>{friend.phoneNumber}</p>
             </div>
           </div>
