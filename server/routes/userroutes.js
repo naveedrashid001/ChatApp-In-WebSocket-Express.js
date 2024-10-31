@@ -1,11 +1,9 @@
-// routes/userroutes.js
 const express = require('express');
-const User = require('../models/user'); // Import the User model
+const User = require('../models/user');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken'); // Import jwt for token generation
-// const { createAvatar } = require('@dicebear/avatars');
-const style = require('@dicebear/avatars-bottts-sprites');
+const jwt = require('jsonwebtoken');
+
 
 // User registration route
 router.post('/register', async (req, res) => {
@@ -36,7 +34,6 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Error registering user', error });
     }
 });
-
 
 // User login route
 router.post('/login', async (req, res) => {
@@ -196,7 +193,7 @@ router.get('/user/avatar', async (req, res) => {
     }
 });
 
-// Route to get user for profile page 
+// Route to get user for profile page  no need 
 router.get('/user', async (req, res) => {
     const { phoneNumber } = req.query;
   
@@ -212,7 +209,7 @@ router.get('/user', async (req, res) => {
       res.status(500).json({ message: 'Error fetching user' });
     }
   });
-  
+
 // Add this to your Express backend (e.g., in userroutes.js)
 router.post('/user/update', async (req, res) => {
     const { phoneNumber, avatar, name, about } = req.body;
@@ -234,8 +231,7 @@ router.post('/user/update', async (req, res) => {
       res.status(500).json({ message: 'Error updating user profile' });
     }
   });
-  
-  
+
   // Route to get all users
 router.get('/users', async (req, res) => {
     try {
