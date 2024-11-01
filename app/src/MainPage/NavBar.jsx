@@ -3,44 +3,87 @@ import Friends from './Friends';
 import Icon from './Icon';
 import AddFriend from './AddFriend';
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
-function NavBar() {
+function NavBar({ onFriendSelect }) {
   const [friends, setFriends] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const currentUserPhoneNumber = Cookies.get('phoneNumber'); // Retrieve phone number from cookies
+  const currentUserPhoneNumber = Cookies.get('phoneNumber');
 
-  // Load friends on component mount
-  useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/userroutes/friends/${currentUserPhoneNumber}`);
-        const data = await response.json();
-        setFriends(data);
-      } catch (error) {
-        console.error('Error fetching friends:', error);
-      }
-    };
-    if (currentUserPhoneNumber) {
-      fetchFriends();
-    }
-  }, [currentUserPhoneNumber]);
-
-  // Handle adding a friend
-  const handleFriendAdded = (newFriend) => {
-    if (!friends.some(friend => friend.phoneNumber === newFriend.phoneNumber)) {
-      setFriends(prevFriends => [...prevFriends, newFriend]);
+  const fetchFriends = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/userroutes/friends/${currentUserPhoneNumber}`);
+      const data = await response.json();
+      setFriends(data);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
     }
   };
 
-  // Handle search input change
+  useEffect(() => {
+    if (currentUserPhoneNumber) {
+      fetchFriends();
+      const intervalId = setInterval(fetchFriends, 30000);
+      return () => clearInterval(intervalId);
+    }
+  }, [currentUserPhoneNumber]);
+
+  const handleFriendAdded = () => {
+    fetchFriends();
+  };
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Filter friends based on the search term
   const filteredFriends = friends.filter(friend =>
     friend.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const updateFriendName = async (friendId, newName) => {
+    try {
+      const response = await fetch(`http://localhost:3000/userroutes/friend/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: currentUserPhoneNumber,
+          friendOldName: friends.find(friend => friend._id === friendId).name,
+          friendNewName: newName,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update friend name');
+
+      const updatedFriends = await response.json();
+      setFriends(updatedFriends);
+    } catch (error) {
+      console.error('Error updating friend name:', error);
+      toast.error('Error updating friend name: ' + error.message);
+    }
+  };
+
+  const handleDeleteFriend = async (friendId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/userroutes/friend/${friendId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber: currentUserPhoneNumber }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete friend');
+
+      const updatedFriends = friends.filter(friend => friend._id !== friendId);
+      setFriends(updatedFriends);
+      toast.success("Friend deleted successfully!");
+    } catch (error) {
+      console.error('Error deleting friend:', error);
+      toast.error('Error deleting friend: ' + error.message);
+    }
+  };
 
   return (
     <div className="d-flex">
@@ -65,7 +108,16 @@ function NavBar() {
           />
         </div>
         <div className="mt-3">
-          <Friends friends={filteredFriends} />
+          {filteredFriends.length > 0 ? (
+            <Friends
+              friends={filteredFriends}
+              onFriendSelect={onFriendSelect}
+              onUpdateFriendName={updateFriendName}
+              onDeleteFriend={handleDeleteFriend}
+            />
+          ) : (
+            <p className="text-center text-muted">Result not found</p>
+          )}
         </div>
       </div>
     </div>

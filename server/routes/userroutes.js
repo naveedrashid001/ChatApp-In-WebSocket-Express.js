@@ -211,26 +211,82 @@ router.get('/user', async (req, res) => {
   });
 
 // Add this to your Express backend (e.g., in userroutes.js)
+// Add this to your Express backend (e.g., in userroutes.js)
 router.post('/user/update', async (req, res) => {
     const { phoneNumber, avatar, name, about } = req.body;
+
+    try {
+        // Find and update the user based on their phone number
+        const user = await User.findOneAndUpdate(
+            { phoneNumber },
+            { avatar, name, about },
+            { new: true } // Return the updated document
+        );
+
+        if (user) {
+            res.status(200).json({ message: 'User profile updated successfully', user });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({ message: 'Error updating user profile' });
+    }
+});
+
+
+// Update friend's name
+router.put('/friend/update', async (req, res) => {
+    const { phoneNumber, friendOldName, friendNewName } = req.body;
+
+    try {
+        // Find the user by phone number
+        const user = await User.findOne({ phoneNumber });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        // Find the friend in the user's friends array
+        const friend = user.friends.find(f => f.name === friendOldName);
+        if (!friend) {
+            return res.status(404).json({ message: "Friend not found." });
+        }
+
+        // Update friend's name
+        friend.name = friendNewName;
+        await user.save();
+
+        // Return updated friends list
+        res.json(user.friends);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error." });
+    }
+});
+
+router.delete('/friend/:friendId', async (req, res) => {
+    const { friendId } = req.params;
+    const { phoneNumber } = req.body; // Assuming you need to validate the request with the phone number
   
     try {
-      const user = await User.findOneAndUpdate(
-        { phoneNumber },
-        { avatar, name, about },
-        { new: true } // Return the updated document
-      );
-  
-      if (user) {
-        res.status(200).json({ message: 'User profile updated successfully', user });
-      } else {
-        res.status(404).json({ message: 'User not found' });
+      // Find the user by their phone number
+      const user = await User.findOne({ phoneNumber });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
       }
+  
+      // Remove the friend from the user's friends array
+      user.friends = user.friends.filter(friend => friend._id.toString() !== friendId);
+      await user.save(); // Save the updated user data
+  
+      res.status(200).json(user.friends); // Return the updated friends list
     } catch (error) {
-      console.error('Error updating user profile:', error);
-      res.status(500).json({ message: 'Error updating user profile' });
+      console.error('Error deleting friend:', error);
+      res.status(500).json({ message: 'Error deleting friend' });
     }
   });
+  
 
   // Route to get all users
 router.get('/users', async (req, res) => {

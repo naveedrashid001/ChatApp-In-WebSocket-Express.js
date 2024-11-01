@@ -1,58 +1,38 @@
-// Import necessary modules
+// app.js
 const express = require('express');
 const { createServer } = require('node:http');
-const { join } = require('node:path');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
-// Import routes
+const cookieParser = require('cookie-parser');
 const userroutes = require('./routes/userroutes');
-const { User1Messages, User2Messages } = require('./models/messages'); 
+const messageRoutes = require('./routes/messageRoutes'); // Import message routes
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: { origin: 'http://localhost:5173', methods: ['GET', 'POST'] }
+});
 
-// Enable CORS for frontend connection (customize if needed)
+// Middlewares
 app.use(cors({ origin: 'http://localhost:5173' }));
-
-// Middleware to parse JSON bodies
 app.use(express.json());
+app.use(cookieParser());
+
+// Attach Socket.IO to requests
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/chatapp')
   .then(() => console.log('Connected to MongoDB (chatapp)'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Serve static file
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, '/public/index.html'));
-});
-
-// Use user routes
+// Routes
 app.use('/userroutes', userroutes);
-
-// Socket.IO setup
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  socket.on('chat message', (data) => {
-    const MessageModel = data.user === 1 ? User1Messages : User2Messages;
-
-    const newMessage = new MessageModel({
-      message: data.message,
-    });
-
-    newMessage.save()
-      .then(() => console.log(`Message from User ${data.user} saved to MongoDB`))
-      .catch((err) => console.error('Error saving message:', err));
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
-});
+app.use('/messages', messageRoutes); // Use the message route
 
 // Start server
 server.listen(3000, () => {

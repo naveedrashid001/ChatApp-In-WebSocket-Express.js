@@ -1,28 +1,39 @@
+// routes/messageRoutes.js
 const express = require('express');
 const router = express.Router();
-const { User1Messages, User2Messages } = require('../models/messages'); // Adjusted path
+const Message = require('../models/messages');
+const { verifyToken } = require('../verifyToken'); // Auth middleware
 
-// Delete all messages for a specified user
-router.delete('/delete-messages/:userId', async (req, res) => {
-  const userId = parseInt(req.params.userId, 10);
-  let MessageModel;
-
-  // Determine which model to use based on userId
-  if (userId === 1) {
-    MessageModel = User1Messages;
-  } else if (userId === 2) {
-    MessageModel = User2Messages;
-  } else {
-    return res.status(400).send('Invalid user ID');
-  }
-
+// Route to send a message
+router.post('/send', verifyToken, async (req, res) => {
   try {
-    // Delete all documents from the user's collection
-    await MessageModel.deleteMany({});
-    res.status(200).send(`All messages for User ${userId} have been deleted.`);
-  } catch (err) {
-    console.error('Error deleting messages:', err);
-    res.status(500).send('An error occurred while deleting messages.');
+    // Extract sender ID from the authenticated user
+    const senderId = req.user._id;
+    const { recipientId, message } = req.body;
+
+    // Check if recipient and message are provided
+    if (!recipientId || !message) {
+      return res.status(400).json({ error: 'Recipient ID and message content are required.' });
+    }
+
+    // Create a new message
+    const newMessage = new Message({
+      sender: senderId,
+      recipient: recipientId,
+      message,
+    });
+
+    // Save the message in the database
+    await newMessage.save();
+
+    // Emit the new message event via Socket.IO
+    req.io.emit('chat message', newMessage);
+
+    // Send a success response with the message data
+    res.status(201).json({ message: 'Message sent successfully', data: newMessage });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
   }
 });
 

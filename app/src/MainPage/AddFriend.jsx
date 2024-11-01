@@ -17,10 +17,9 @@ function AddFriend({ onFriendAdded }) {
       toast.error("Please enter a phone number.");
       return;
     }
-
+  
     try {
       const body = { phoneNumber, currentUserPhoneNumber };
-
       const response = await fetch('http://localhost:3000/userroutes/friend', {
         method: 'POST',
         headers: {
@@ -28,11 +27,12 @@ function AddFriend({ onFriendAdded }) {
         },
         body: JSON.stringify(body),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        onFriendAdded(data.friend);
+        // Call the function to update the friends list
+        onFriendAdded(data.friend); // This should trigger the NavBar to fetch the updated list
         toast.success("Friend added successfully!");
       } else {
         toast.error(data.message || "There is no account with this number.");
@@ -43,7 +43,7 @@ function AddFriend({ onFriendAdded }) {
     }
     setShowModal(false);
     setPhoneNumber('');
-  };
+  };  
 
   return (
     <>
