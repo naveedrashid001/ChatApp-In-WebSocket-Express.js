@@ -216,7 +216,6 @@ router.get('/user', async (req, res) => {
     }
   });
 
-// Add this to your Express backend (e.g., in userroutes.js)
 router.post('/user/update', async (req, res) => {
     const { phoneNumber, avatar, name, about } = req.body;
 
@@ -326,5 +325,82 @@ router.get('/me', async (req, res) => {
     res.status(500).json({ message: 'Error fetching user details', error });
   }
 });
+
+/////      MESSAGES ROUTE 
+
+// sendd meesages 
+router.post('/send', async (req, res) => {
+    const { text, recipientPhoneNumber, senderPhoneNumber } = req.body;
+
+    if (!text || !recipientPhoneNumber || !senderPhoneNumber) {
+        return res.status(400).json({ error: "Required fields are missing." });
+    }
+
+    try {
+        // Find both sender and recipient users
+        const sender = await User.findOne({ phoneNumber: senderPhoneNumber });
+        const recipient = await User.findOne({ phoneNumber: recipientPhoneNumber });
+
+        if (!recipient) {
+            return res.status(404).json({ error: "Recipient not found." });
+        }
+
+        // Create a message object
+        const message = {
+            recipient: recipientPhoneNumber,
+            message: text,
+            timestamp: new Date(),
+        };
+
+        // Add the message to the recipient's messages
+        recipient.messages.push(message);
+        await recipient.save();
+
+        // Optionally, save the message to the sender's messages as well
+        sender.messages.push({
+            recipient: recipientPhoneNumber,
+            message: text,
+            timestamp: new Date(),
+        });
+        await sender.save();
+
+        return res.status(200).json({ message: "Message sent successfully.", message });
+    } catch (error) {
+        console.error("Error sending message:", error.message);
+        return res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+
+//  get messages
+// Fetch messages for a specific recipient
+router.get('/:recipientPhoneNumber', async (req, res) => {
+    const senderPhoneNumber = req.cookies.phoneNumber; // Get the sender's phone number from cookies
+    const recipientPhoneNumber = req.params.recipientPhoneNumber;
+
+    if (!senderPhoneNumber || !recipientPhoneNumber) {
+        return res.status(400).json({ error: 'Phone numbers are missing.' });
+    }
+
+    try {
+        const senderUser = await User.findOne({ phoneNumber: senderPhoneNumber });
+        if (!senderUser) {
+            return res.status(404).json({ error: 'Sender not found.' });
+        }
+
+        const friend = senderUser.friends.find(friend => friend.phoneNumber === recipientPhoneNumber);
+        if (!friend) {
+            return res.status(404).json({ error: 'Friend not found in your friends list.' });
+        }
+
+        // Find the messages related to the friend from the sender's messages
+        const friendMessages = senderUser.messages.filter(msg => msg.recipient === recipientPhoneNumber);
+        res.status(200).json({ messages: friendMessages });
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
 
 module.exports = router; // Export the router

@@ -1,0 +1,37 @@
+#chat-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.my-message, .their-message {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    margin: 5px 0;
+    max-width: 70%;
+    border-radius: 10px;
+    word-wrap: break-word;
+}
+
+.my-message {
+    align-self: flex-end; /* Aligns sender's messages to the right */
+    background-color: #d1e7dd; /* Light green for sent messages */
+    text-align: left;
+}
+
+.their-message {
+    align-self: flex-start; /* Aligns recipient's messages to the left */
+    background-color: #f8d7da; /* Light red for received messages */
+    text-align: left;
+}
+
+.message-content {
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+
+.message-timestamp {
+    font-size: 0.75em;
+    color: #999;
+    text-align: right;
+}

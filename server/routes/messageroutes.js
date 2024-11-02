@@ -2,47 +2,34 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Correctly import User model
 
-// Route to send a message
-// Route to send a message
-router.post('/send', async (req, res) => {
-  const { text, recipientPhoneNumber } = req.body; 
-  const senderPhoneNumber = req.cookies.phoneNumber; 
 
-  if (!senderPhoneNumber || !recipientPhoneNumber || !text) {
-    return res.status(400).json({ error: 'Phone numbers or message text is missing.' });
+// Route for sending messages
+router.post('/send', async (req, res) => {
+  const { text, recipientPhoneNumber, currentUserPhoneNumber } = req.body;
+
+  // Debugging log
+  console.log("Received data:", { text, recipientPhoneNumber, currentUserPhoneNumber });
+
+  if (!text || !recipientPhoneNumber || !currentUserPhoneNumber) {
+      return res.status(400).json({ error: "Required fields are missing." });
   }
 
   try {
-    const senderUser = await User.findOne({ phoneNumber: senderPhoneNumber });
-    if (!senderUser) {
-      return res.status(404).json({ error: 'Sender not found.' });
-    }
+      const newMessage = new Message({
+          sender: currentUserPhoneNumber,
+          recipient: recipientPhoneNumber,
+          message: text,
+          timestamp: new Date(),
+      });
 
-    const recipientUser = await User.findOne({ phoneNumber: recipientPhoneNumber });
-    if (!recipientUser) {
-      return res.status(404).json({ error: 'Recipient not found.' });
-    }
-
-    // Create the message object
-    const newMessage = {
-      from: senderUser._id,
-      to: recipientUser._id,
-      content: text,
-      timestamp: new Date(),
-    };
-
-    // Save the message to both sender and recipient
-    senderUser.messages.push(newMessage);
-    recipientUser.messages.push(newMessage);
-    await senderUser.save();
-    await recipientUser.save();
-
-    res.status(200).json({ success: true, message: 'Message sent successfully.' });
+      await newMessage.save();
+      return res.status(200).json({ message: "Message sent successfully.", newMessage });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error.' });
+      console.error("Error saving message:", error.message);
+      return res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 // Route to send a message
 router.post('/message', async (req, res) => {
@@ -110,29 +97,31 @@ router.post('/add-friend', async (req, res) => {
 
 // Route to get messages between two users
 router.get('/:recipientPhoneNumber', async (req, res) => {
-  const senderPhoneNumber = req.cookies.phoneNumber; // Correctly access sender's phone number
+  const senderPhoneNumber = req.cookies.phoneNumber;
   const recipientPhoneNumber = req.params.recipientPhoneNumber;
 
   if (!senderPhoneNumber || !recipientPhoneNumber) {
-    return res.status(400).json({ error: 'Phone numbers are missing.' });
+      return res.status(400).json({ error: 'Phone numbers are missing.' });
   }
 
   try {
-    const senderUser = await User.findOne({ phoneNumber: senderPhoneNumber });
-    if (!senderUser) {
-      return res.status(404).json({ error: 'Sender not found.' });
-    }
+      const senderUser = await User.findOne({ phoneNumber: senderPhoneNumber });
+      if (!senderUser) {
+          return res.status(404).json({ error: 'Sender not found.' });
+      }
 
-    const friend = senderUser.friends.find(friend => friend.phoneNumber === recipientPhoneNumber);
-    if (!friend) {
-      return res.status(404).json({ error: 'Friend not found in your friends list.' });
-    }
+      const friend = senderUser.friends.find(friend => friend.phoneNumber === recipientPhoneNumber);
+      if (!friend) {
+          return res.status(404).json({ error: 'Friend not found in your friends list.' });
+      }
 
-    res.status(200).json({ messages: friend.messages });
+      // Return all messages
+      res.status(200).json({ messages: friend.messages });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error.' });
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 module.exports = router;

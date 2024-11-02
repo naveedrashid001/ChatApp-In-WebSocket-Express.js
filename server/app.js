@@ -1,12 +1,11 @@
-// app.js
 const express = require('express');
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const User = require('./models/User'); // Import User model
 const userroutes = require('./routes/userroutes');
-const messageRoutes = require('./routes/messageRoutes'); // Import message routes
 
 const app = express();
 const server = createServer(app);
@@ -21,25 +20,39 @@ const io = new Server(server, {
 // Middlewares
 app.use(cors({
   origin: 'http://localhost:5173',
-  credentials: true, // Allow credentials for CORS
+  credentials: true,
 }));
 app.use(express.json());
 app.use(cookieParser());
-
-// Attach Socket.IO to requests
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/chatapp')
   .then(() => console.log('Connected to MongoDB (chatapp)'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Routes
+// Socket.IO functionality
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Handle incoming messages
+  socket.on('sendMessage', async ({ sender, recipient, message }) => {
+    try {
+      // Save message to the user's messages array
+      await User.updateOne(
+        { phoneNumber: sender }, 
+        { $push: { messages: { recipient, message } } }
+      );
+
+      // Emit message to the recipient
+      socket.to(recipient).emit('receiveMessage', { sender, message });
+
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  });
+});
+
 app.use('/userroutes', userroutes);
-app.use('/messages', messageRoutes); // Use the message route
 
 // Start server
 server.listen(3000, () => {
