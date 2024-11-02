@@ -3,9 +3,11 @@ import NavBar from './NavBar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import UnSelectedChat from './UnSelectedChat';
 import Chat from './Chat';
+import Cookies from 'js-cookie';
 
 function MainPage() {
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const currentUserPhoneNumber = Cookies.get('phoneNumber'); // Get current user phone number
 
   const handleFriendSelect = (friend) => {
     setSelectedFriend(friend); // Set the selected friend
@@ -19,7 +21,12 @@ function MainPage() {
         </div>
         <div className="col-8">
           {selectedFriend ? (
-            <Chat friend={selectedFriend} />
+            <Chat
+              currentUserPhoneNumber={currentUserPhoneNumber}
+              recipientPhoneNumber={selectedFriend.phoneNumber}
+              recipientAvatar={selectedFriend.avatar}
+              recipientName={selectedFriend.name}
+            />
           ) : (
             <UnSelectedChat />
           )}

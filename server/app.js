@@ -11,11 +11,18 @@ const messageRoutes = require('./routes/messageRoutes'); // Import message route
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  cors: { origin: 'http://localhost:5173', methods: ['GET', 'POST'] }
+  cors: {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+    credentials: true, // Allow credentials for Socket.IO
+  }
 });
 
 // Middlewares
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true, // Allow credentials for CORS
+}));
 app.use(express.json());
 app.use(cookieParser());
 

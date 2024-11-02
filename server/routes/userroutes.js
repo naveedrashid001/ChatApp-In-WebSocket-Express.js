@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../models/user');
+const User = require('../models/User');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -63,6 +63,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Route to add a friend
+// Route to add a friend
 router.post('/friend', async (req, res) => {
     const { phoneNumber, currentUserPhoneNumber } = req.body;
     console.log("Incoming request - Phone Number:", phoneNumber, "Current User Phone Number:", currentUserPhoneNumber);
@@ -104,9 +105,14 @@ router.post('/friend', async (req, res) => {
         });
     } catch (error) {
         console.error('Error adding friend:', error);
-        res.status(500).json({ message: 'Error adding friend' });
+        // Check if the error has a specific message
+        if (error instanceof mongoose.Error.ValidationError) {
+            return res.status(400).json({ message: 'Validation Error', details: error.errors });
+        }
+        res.status(500).json({ message: 'Error adding friend', error: error.message });
     }
 });
+
 
 
 // Route to get all friends for the current user
@@ -210,7 +216,6 @@ router.get('/user', async (req, res) => {
     }
   });
 
-// Add this to your Express backend (e.g., in userroutes.js)
 // Add this to your Express backend (e.g., in userroutes.js)
 router.post('/user/update', async (req, res) => {
     const { phoneNumber, avatar, name, about } = req.body;

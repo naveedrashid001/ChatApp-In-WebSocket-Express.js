@@ -1,41 +1,98 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function Chat({ friend }) {
-  return (
-    <>
-      <div style={{ width: "100%", height: "60px" }}>
-        <div className="d-flex align-items-center mt-2 p-2">
-          <img
-            src={friend.avatar} // Display the friend's image
-            alt={friend.name}
-            className="rounded-circle me-2"
-            style={{ width: '50px', height: '50px' }}
-          />
-          <h6>{friend.name}</h6>
+const Chat = ({ currentUserPhoneNumber, recipientPhoneNumber, recipientAvatar, recipientName }) => {
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
+
+    // Fetch messages on initial render and whenever recipientPhoneNumber changes
+    useEffect(() => {
+        if (recipientPhoneNumber) {
+            fetchMessages();
+        }
+    }, [recipientPhoneNumber]);
+
+    const fetchMessages = async () => {
+        console.log("Fetching messages for recipient:", recipientPhoneNumber);
+        try {
+            const response = await axios.get(`http://localhost:3000/messages/${recipientPhoneNumber}`, {
+                withCredentials: true
+            });
+            setMessages(response.data.messages || []);
+        } catch (error) {
+            console.error("Error fetching messages:", error.message);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        console.log("Sending message:", message);
+
+        try {
+            const newMessage = {
+                from: currentUserPhoneNumber,
+                to: recipientPhoneNumber,
+                content: message,
+                timestamp: new Date().toISOString()
+            };
+            setMessages(prevMessages => [...prevMessages, newMessage]);
+
+            const response = await axios.post("http://localhost:3000/messages/send", {
+                text: message,
+                recipientPhoneNumber
+            }, { withCredentials: true });
+
+            console.log("Server Response:", response.data);
+
+            setMessage('');
+        } catch (error) {
+            console.error("Error sending message:", error.response ? error.response.data : error.message);
+        }
+    };
+
+    useEffect(() => {
+        const chatContainer = document.getElementById("chat-container");
+        if (chatContainer) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    }, [messages]);
+
+    return (
+        <div>
+            <div className="chat-header d-flex align-items-center p-2" style={{ height: "60px", backgroundColor: 'green' }}>
+  <img 
+    src={recipientAvatar} 
+    alt={recipientName} 
+    style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', marginRight: '10px' }} 
+  />
+  <p className="mb-0" style={{ color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+    {recipientName}
+  </p>
+</div>
+
+            <div id="chat-container" style={{ height: '400px', overflowY: 'scroll', border: '1px solid #ddd', padding: '10px' }}>
+                {messages.map((msg, index) => (
+                    <div key={index} className={msg.from === currentUserPhoneNumber ? 'my-message' : 'their-message'} style={{ margin: '5px 0' }}>
+                        <p>{msg.content}</p>
+                        <span style={{ fontSize: '0.8em', color: '#999' }}>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={handleSendMessage} style={{ display: 'flex', marginTop: '10px' }}>
+                <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+                <button type="submit" style={{ marginLeft: '10px', padding: '10px 20px', borderRadius: '4px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}>
+                    Send
+                </button>
+            </form>
         </div>
-      </div>
-
-      {/* Div with the background image */}
-      <div
-       style={{
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url('https://www.shutterstock.com/image-vector/social-media-seamless-pattern-doodle-600nw-1992018458.jpg')`,
-        backgroundSize: 'cover', // Ensures the image covers the entire div
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        width: '100%',
-        height: '80vh', // Set the desired height for the background area
-        overflow: 'hidden',
-      }}
-      
-      >
-        {/* Content inside the background image div (if any) */}
-      </div>
-      <form  className='mt-2'>
-      <input type="text"  placeholder='Type a message' style={{width:"95%"}}/>
-      <i class="bi bi-send text-success ms-2" style={{fontSize:"23px"}}></i>
-      </form>
-    </>
-  );
-}
+    );
+};
 
 export default Chat;

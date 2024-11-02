@@ -32,7 +32,7 @@ function AddFriend({ onFriendAdded }) {
   
       if (response.ok) {
         // Call the function to update the friends list
-        onFriendAdded(data.friend); // This should trigger the NavBar to fetch the updated list
+        onFriendAdded(); // Call the function to refresh the friends list
         toast.success("Friend added successfully!");
       } else {
         toast.error(data.message || "There is no account with this number.");
