@@ -10,7 +10,6 @@ function AddProfile() {
   const [showInputs, setShowInputs] = useState(false);
   const defaultImage = 'https://static.vecteezy.com/system/resources/previews/027/448/973/non_2x/avatar-account-icon-default-social-media-profile-photo-vector.jpg';
   
-  // Retrieve phone number from cookies
   const phoneNumber = Cookies.get('phoneNumber');
 
   const saveImage = async () => {
@@ -43,57 +42,73 @@ function AddProfile() {
   };
 
   const clearSession = () => {
-    // Clear cookies and local storage
     Cookies.remove('phoneNumber');
     localStorage.clear(); 
-
-    // Navigate to the login page
     navigate('/login');
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <ToastContainer />
-      <h1>Add Profile Image</h1>
-      <div style={{ position: 'relative', display: 'inline-block' }}>
-        <img
-          src={imageUrl || defaultImage}
-          alt="Profile"
-          style={{ width: '150px', height: '150px', borderRadius: '50%' }}
-        />
-        <i
-          className="bi bi-camera"
-          onClick={() => setShowInputs(true)}
-          style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '10px',
-            fontSize: '24px',
-            cursor: 'pointer',
-            color: '#fff',
-            backgroundColor: '#007bff',
-            borderRadius: '50%',
-            padding: '5px',
-          }}
-        ></i>
-      </div>
-
-      {showInputs && (
-        <div style={{ marginTop: '20px' }}>
-          <input
-            type="url"
-            placeholder="Paste Image URL"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            style={{ marginBottom: '10px', width: '200px', padding: '5px' }}
+    <div 
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ padding: '20px', maxWidth: '400px', width: '100%' }}>
+        <ToastContainer />
+        <h1 className='mb-0'>Profile</h1>
+        <div style={{ position: 'relative', display: 'inline-block', marginBottom: '20px' }}>
+          <img
+            src={imageUrl || defaultImage}
+            alt="Profile"
+            style={{ width: '200px', height: '200px', borderRadius: '50%', marginTop:"0px" }}
           />
-          <button onClick={saveImage}>Save Image</button>
+          <i
+            className="bi bi-camera"
+            onClick={() => setShowInputs(true)}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '10px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#fff',
+              backgroundColor: '#007bff',
+              borderRadius: '50%',
+              padding: '5px',
+            }}
+          ></i>
         </div>
-      )}
 
-      <button onClick={handleSkip} style={{ marginTop: '20px', padding: '10px 20px' }}>
-        Skip
-      </button>
+        {showInputs && (
+          <div style={{ marginTop: '20px' }}>
+            <input
+              type="url"
+              placeholder="Paste Image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              style={{ marginBottom: '10px', width: '200px', padding: '5px' }}
+            /> <br />
+            <button onClick={saveImage} style={{ backgroundColor: '#1EBE57', color: 'white', padding: '5px 10px', border: 'none', borderRadius: '5px', marginRight: '10px' }}>
+              Save Image
+            </button>
+            <button onClick={() => setShowInputs(false)} style={{ backgroundColor: '#dc3545', color: 'white', padding: '5px 10px', border: 'none', borderRadius: '5px' }}>
+              Cancel
+            </button>
+          </div>
+        )} <br />
+
+        <button 
+          className='btn w-30' 
+          onClick={handleSkip}  
+          style={{ backgroundColor: '#1EBE57', color: 'white', marginTop: '5px', padding: '5px 10px', borderRadius: '5px' }}
+        >
+          Skip
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; // Import js-cookie
+import Cookies from 'js-cookie';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login({ onLogin }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3000/userroutes/login', { 
+      const response = await fetch('http://localhost:3000/userroutes/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,47 +25,70 @@ function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Assuming the token is returned in data.token
-        const { token } = data; // Adjust based on your API response
+        const { token } = data;
 
-        // Store the token and phone number in cookies
-        Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
+        Cookies.set('token', token, { expires: 7 });
         Cookies.set('phoneNumber', phoneNumber, { expires: 7 });
 
-        onLogin(); // Update authentication status
-        navigate('/mainpage'); // Redirect to home page
+        toast.success('Login successful!', {
+          position: 'top-right',
+          autoClose: 2000,
+          onClose: () => navigate('/mainpage'),
+        });
+
+        onLogin();
       } else {
-        setErrorMessage(data.message || 'Invalid phone number or password');
+        toast.error(data.message || 'Invalid phone number or password', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
       }
     } catch (error) {
       console.error('Error during login:', error);
-      setErrorMessage('An error occurred. Please try again later.');
+      toast.error('An error occurred. Please try again later.', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
     }
   };
 
   return (
-    <div className="container">
-      <h1>Welcome to WhatsApp</h1>
-      <p>Please enter your phone number to continue</p>
-      <form id="login-form" onSubmit={handleLogin}>
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Continue</button>
-      </form>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <button onClick={() => navigate('/register')}>Register</button>
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <ToastContainer />
+      <div className="card p-4 shadow" style={{ maxWidth: '400px', width: '100%' }}>
+        <h1 className="text-center text-success mb-4">Welcome</h1>
+        <p className="text-center">Hey !    Here is WhatApp 2.0</p>
+        <form id="login-form" onSubmit={handleLogin}>
+          <div className="mb-3">
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              className="form-control"
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              className="form-control"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn w-100 mb-3" style={{backgroundColor:"#1EBE57", color:"white"}}>Continue</button>
+        </form>
+        <button className=" btn w-100" style={{backgroundColor:"#1EBE57", color:"white"}} onClick={() => navigate('/register')}>
+          Register
+        </button>
+      </div>
     </div>
   );
 }

@@ -11,12 +11,13 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     password: { type: String, required: true },
     avatar: { type: String, default: 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg' },
+    about: { type: String, default: '' }, // Add the "about" field here
     friends: [{ 
         name: { type: String, required: true },
         phoneNumber: { type: String, required: true },
-        avatar: { type: String, default: 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg' } // Use the same default avatar for friends
-    }], // An array of friends
-    messages: [messageSchema] // An array of messages sent/received by the user
+        avatar: { type: String, default: 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg' }
+    }],
+    messages: [messageSchema]
 });
 
 module.exports = mongoose.model('User', userSchema);

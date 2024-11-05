@@ -2,7 +2,18 @@
 #chat-container {
     display: flex;
     flex-direction: column;
+    height: 80vh;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-image: url("https://t3.ftcdn.net/jpg/03/89/94/34/360_F_389943415_0IMXIfCIo4OUzwtsIhxCGeKEdRrhvNym.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgb(255, 255, 255); /* Optional overlay for readability */
+    background-blend-mode: lighten; /* Optional: Adjusts contrast */
 }
+
 
 .my-message, .their-message {
     display: flex;

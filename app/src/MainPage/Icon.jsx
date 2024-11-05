@@ -7,17 +7,19 @@ function Icon() {
     <div className="d-flex flex-column justify-content-between align-items-start" style={{ height: '98vh' }}>
       {/* First Group of Icons */}
       <div className="d-flex flex-column gap-2">
-        <i className="bi bi-justify"></i>
-        <i className="bi bi-chat"></i>
-        <i className="bi bi-telephone"></i>
-        <i className="bi bi-app-indicator"></i>
+      <Link to="/working"><i className="bi bi-justify"></i></Link>
+      <Link to="/working"> <i className="bi bi-chat"></i></Link>
+      <Link to="/working"><i className="bi bi-telephone"></i></Link>
+      <Link to="/working"> <i className="bi bi-app-indicator"></i></Link>
       </div>
 
       {/* Second Group of Icons */}
       <div className="d-flex flex-column gap-2">
-        
+      <Link to="/working">
         <i className="bi bi-archive"></i>
-        <i className="bi bi-gear"></i>
+        </Link>
+        <Link to="/working">
+        <i className="bi bi-gear"></i></Link>
         <Link to="/profile">
         <i className="bi bi-person-circle"></i>
         </Link>

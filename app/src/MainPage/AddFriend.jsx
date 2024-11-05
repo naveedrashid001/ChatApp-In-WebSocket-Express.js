@@ -48,7 +48,7 @@ function AddFriend({ onFriendAdded }) {
   return (
     <>
       <ToastContainer />
-      <i className="bi bi-person-plus me-2" onClick={handleAddFriendClick}></i>
+      <i className="bi bi-person-plus me-2" onClick={handleAddFriendClick} style={{ cursor: 'pointer' }}></i>
 
       {showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>

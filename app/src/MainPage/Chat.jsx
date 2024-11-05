@@ -80,7 +80,7 @@ const Chat = ({ currentUserPhoneNumber, recipientPhoneNumber, recipientAvatar, r
                 </p>
             </div>
 
-            <div id="chat-container" style={{ height: '400px', overflowY: 'scroll', border: '1px solid #ddd', padding: '10px', display: 'flex', flexDirection: 'column' }}>
+            <div id="chat-container" style={{ height: '80vh', overflowY: 'scroll', border: '1px solid #ddd', padding: '10px', display: 'flex', flexDirection: 'column' }}>
                 {messages.map((msg, index) => (
                     <div key={index} className={msg.from === currentPhoneNumber ? 'my-message' : 'their-message'}>
                         <p className="message-content">{msg.content}</p>
@@ -99,7 +99,7 @@ const Chat = ({ currentUserPhoneNumber, recipientPhoneNumber, recipientAvatar, r
                     placeholder="Type a message..."
                     style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
-                <button type="submit" style={{ marginLeft: '10px', padding: '10px 20px', borderRadius: '4px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}>
+                <button type="submit" style={{ marginLeft: '10px', padding: '10px 20px', borderRadius: '4px', backgroundColor: '#1EBE57', color: '#fff', border: 'none' }}>
                     Send
                 </button>
             </form>
