@@ -9,24 +9,31 @@ const jwt = require('jsonwebtoken');
 router.post('/register', async (req, res) => {
     const { phoneNumber, name, password } = req.body;
 
+    // Validation checks
+    if (!/^\d{11}$/.test(phoneNumber)) {
+        return res.status(400).json({ message: 'Phone number must be exactly 11 digits.' });
+    }
+    if (name.length < 5) {
+        return res.status(400).json({ message: 'Name must be at least 5 characters long.' });
+    }
+    if (password.length < 6 || password.length > 12) {
+        return res.status(400).json({ message: 'Password must be between 6 and 12 characters.' });
+    }
+
     try {
-        // Check if the user already exists
         const existingUser = await User.findOne({ phoneNumber });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash the password before saving
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user instance without manually setting an avatar (model's default will be used)
         const newUser = new User({
             phoneNumber,
             name,
-            password: hashedPassword // Save the hashed password
+            password: hashedPassword
         });
 
-        // Save the user to the database
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (error) {
@@ -371,8 +378,6 @@ router.post('/send', async (req, res) => {
     }
 });
 
-
-//  get messages
 // Fetch messages for a specific recipient
 router.get('/:recipientPhoneNumber', async (req, res) => {
     const senderPhoneNumber = req.cookies.phoneNumber; // Get the sender's phone number from cookies

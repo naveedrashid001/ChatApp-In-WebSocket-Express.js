@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; // Import js-cookie
+import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer, toast } from 'react-toastify'; // Import toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import styles
 
 function Register() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    if (!/^\d{11}$/.test(phoneNumber)) {
+      toast.error('Phone number must be exactly 11 digits.'); // Use toast for error
+      return;
+    }
+    if (name.length < 5) {
+      toast.error('Name must be at least 5 characters.'); // Use toast for error
+      return;
+    }
+    if (password.length < 6 || password.length > 12) {
+      toast.error('Password must be between 6 and 12 characters.'); // Use toast for error
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:3000/userroutes/register', {
@@ -25,20 +40,18 @@ function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Registration successful!');
+        toast.success('Registration successful!'); // Use toast for success
         setPhoneNumber('');
         setName('');
         setPassword('');
-
         Cookies.set('phoneNumber', phoneNumber, { expires: 7 });
-
         navigate('/AddProfile');
       } else {
-        setMessage(data.message || 'Registration failed.');
+        toast.error(data.message || 'Registration failed.'); // Use toast for error
       }
     } catch (error) {
       console.error('Error during registration:', error);
-      setMessage('An error occurred. Please try again later.');
+      toast.error('An error occurred. Please try again later.'); // Use toast for error
     }
   };
 
@@ -85,7 +98,6 @@ function Register() {
             Register
           </button>
         </form>
-        {message && <p className="text-center text-danger">{message}</p>}
         <button
           onClick={() => navigate('/AddProfile')}
           className="btn w-100"
@@ -94,6 +106,7 @@ function Register() {
           Already have an account? Log in
         </button>
       </div>
+      <ToastContainer /> {/* Add ToastContainer to your component */}
     </div>
   );
 }
